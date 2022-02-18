@@ -217,21 +217,56 @@ class Satellite {
     }
 }
 
-async function main() {
-    const map = new Leaflet(49.973889, 6.636389, 2)
+async function mapControl() {
+    // Create a new map at the Center of the World
+    const map = new Leaflet(20.7502, 114.7655, 3)
+
+    // Creates a new satellite object and retrieves the data from the API.
     const iss = await new Satellite(25544).fetchSatellite();
+
+    // Adds the satellite to the map, zooms to it, and sets the auto-update interval to 15 seconds.
     map.addSatellite(iss);
     map.zoomToSatellite(iss);
     iss.autoUpdate(true, 15000, map)
+
+    // For debugging purposes, we can print the satellite's data to the console.
     console.log(iss)
 
-    document.getElementById('updateTime')
-        .addEventListener('change', (numberInput) => {
-            if (numberInput.target.value > 60 || numberInput.target.value < 5) {
-                numberInput.target.value = 15;
-                console.error('Interval must be between 1 and 60 seconds. Defaulting to 15 seconds.')
-            }
-            iss.autoUpdate(true, numberInput.target.value*1000, map)
-        })
+    // In the header, is a number input which can be changed to update the auto-update interval.
+    // Only values < 60 and > 5 are valid. If false, it auto-resets it to the default: 15 seconds.
+    // TODO: Add visual error feedback via Bootstrap..
+    document.getElementById('updateTime').addEventListener('change', (numberInput) => {
+            domAutoUpdate(numberInput, numberInput.target.value, iss, map)
+    })
 }
-main();
+mapControl();
+
+function domAutoUpdate(domButton, interval, satellite, map) {
+    interval *= 1000; // Convert seconds to milliseconds
+
+    // Error handling feedback
+    if (interval > 60000 || interval < 5000) {
+        document.getElementById('updateFormTag').classList.add('needs-validation', 'was-validated');
+
+        // If they input a value that is too low, we need to reset it to the default.
+        // We wait 3s to enhance the UX experience.
+        const resetUpdater = setTimeout(() => {
+            domButton.target.value = 15; // Reset to default 15 seconds
+            satellite.autoUpdate(true, domButton.target.value, map)
+        }, 5000);
+
+
+        const interruptUpdateReset = setInterval(() => {
+            if (domButton.target.value < 60 && domButton.target.value > 5) {
+                clearTimeout(resetUpdater);
+                clearInterval(interruptUpdateReset)
+            }
+        }, 20);
+
+        console.error('Update interval must be between 1 and 60 seconds. Defaulting to 15 seconds.')
+    } else {
+        satellite.autoUpdate(true, interval, map)
+    }
+
+
+}

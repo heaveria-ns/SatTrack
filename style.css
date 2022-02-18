@@ -1,3 +1,7 @@
 #map {
     height: calc(100vh - 20px);
 }
+
+.invalid-tooltip {
+    z-index: 9999;
+}
