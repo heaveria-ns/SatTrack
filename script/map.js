@@ -38,7 +38,7 @@ class Leaflet {
 
         // Adds the popup/tooltip to the marker
         mapMarker
-            .bindPopup(`<b>${satellite.name}</b> (${satellite.latitude.toFixed(2)}, ${satellite.longitude.toFixed(2)})<br>
+            .bindPopup(`<b>${satellite.name.toUpperCase()}</b> (${satellite.latitude.toFixed(2)}, ${satellite.longitude.toFixed(2)})<br>
                                 Altitude: ${satellite.altitude.toFixed(2)}, Velocity ${satellite.velocity.toFixed(2)} ${satellite.units[0]}/h<br>
                                 Visibility: ${satellite.visibility}, Timestamp: ${new Date(satellite.timestamp*1000).toLocaleString()}`)
 
@@ -255,7 +255,7 @@ function domAutoUpdate(domButton, interval, satellite, map) {
             satellite.autoUpdate(true, domButton.target.value, map)
         }, 5000);
 
-
+        // If the user corrects their input before the setTimeout does, we need to break the setTimeout.
         const interruptUpdateReset = setInterval(() => {
             if (domButton.target.value < 60 && domButton.target.value > 5) {
                 clearTimeout(resetUpdater);
