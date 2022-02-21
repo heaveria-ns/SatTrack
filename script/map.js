@@ -1,12 +1,8 @@
 class Leaflet {
     map;
     markers = [];
+    satelliteIndex = 0;
     icons = {
-        satellite: L.icon({
-            iconUrl: './public/satellite.png',
-            iconSize: [50, 50],
-            zIndexOffset: -1000
-        }),
         dot: L.icon({
             iconUrl: './public/dot.png',
             iconSize: [20, 20],
@@ -30,7 +26,11 @@ class Leaflet {
 
         // Create icon and add it to map with options
         const mapMarker = L.marker([satellite.latitude, satellite.longitude], {
-            icon: this.icons.satellite,
+            icon: L.icon({
+                iconUrl: `./public/satellite${this.satelliteIndex}.png`,
+                iconSize: [50, 50],
+                zIndexOffset: -1000
+            }),
             title: satellite.name,
             riseOnHover: true,
             riseOffset: 250
@@ -238,6 +238,14 @@ async function mapControl() {
     document.getElementById('updateTime').addEventListener('change', (numberInput) => {
             domAutoUpdate(numberInput, numberInput.target.value, iss, map)
     })
+
+    document.getElementById('satellitePickerLeft').addEventListener('click', () => {
+        changeSatellite(map, 'left');
+    });
+
+    document.getElementById('satellitePickerRight').addEventListener('click', () => {
+        changeSatellite(map, 'right');
+    });
 }
 mapControl();
 
@@ -267,6 +275,24 @@ function domAutoUpdate(domButton, interval, satellite, map) {
     } else {
         satellite.autoUpdate(true, interval, map)
     }
+}
+
+function changeSatellite(map, leftOrRight) {
+    const satelliteIcon = document.getElementById(('satellitePickerIcon'));
+    const currentSatelliteNumber = parseInt(satelliteIcon.src.charAt(satelliteIcon.src.length - 5));
 
 
+    let newSatelliteNumber = leftOrRight === 'left' ? currentSatelliteNumber - 1 : currentSatelliteNumber + 1;
+    if (newSatelliteNumber > 5) newSatelliteNumber = 0;
+    if (newSatelliteNumber < 0) newSatelliteNumber = 5;
+
+    satelliteIcon.src = `../public/satellite${newSatelliteNumber}.png`;
+
+    map.satelliteIndex = newSatelliteNumber;
+
+    map.markers[map.markers.length - 1].marker.setIcon(L.icon({
+        iconUrl: `../public/satellite${newSatelliteNumber}.png`,
+        iconSize: [50, 50],
+        zIndexOffset: -1000,
+    }));
 }
