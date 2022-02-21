@@ -27,7 +27,7 @@ class Leaflet {
         // Create icon and add it to map with options
         const mapMarker = L.marker([satellite.latitude, satellite.longitude], {
             icon: L.icon({
-                iconUrl: `./public/satellite${this.satelliteIndex}.png`,
+                iconUrl: window.location.href.includes('github') ? `SatTrack/public/satellite${this.satelliteIndex}.png` : `../public/satellite${this.satelliteIndex}.png`,
                 iconSize: [50, 50],
                 zIndexOffset: -1000
             }),
@@ -286,7 +286,15 @@ function changeSatellite(map, leftOrRight) {
     if (newSatelliteNumber > 5) newSatelliteNumber = 0;
     if (newSatelliteNumber < 0) newSatelliteNumber = 5;
 
-    satelliteIcon.src = `../public/satellite${newSatelliteNumber}.png`;
+    if (window.location.href.includes('github')) {
+        satelliteIcon.src = `SatTrack/public/satellite${newSatelliteNumber}.png`;
+    } else {
+        satelliteIcon.src = `../public/satellite${newSatelliteNumber}.png`;
+    }
+
+
+    // See if windows.location.href contains 'github'
+    if (window.location.href.includes('github'))
 
     map.satelliteIndex = newSatelliteNumber;
 
